@@ -1,27 +1,36 @@
 <?php
+
+/**
+ * Calculates moon phases by date:
+ * 0 - New Moon
+ * 1 - Waxing Crescent
+ * 2 - First Quarter
+ * 3 - Waxing Gibbous
+ * 4 - Full Moon
+ * 5 - Waning Gibbous
+ * 6 - Last Quarter
+ * 7 - Waning Crescent
+ */
 class MoonPhase
 {
-    function get($date) {
-if (!isset($date))
-{
-list($y, $m, $d) = preg_split('/-/', date("Y-n-j"));
+    /**
+     * @param $date
+     * @return int
+     */
+    function get($date)
+    {
+        list($year, $month, $day) = preg_split('/-/', date("Y-n-j", strtotime($date)));
+        if ($month < 3) {
+            $year--;
+            $month += 12;
+        }
+        $daysAD = 365.25 * $year;
+        $daysThisYear = 30.6 * ($month + 1);
+        $totalDays = $daysAD + $daysThisYear + $day - 694039.09;
+        $totalDays /= 29.53;
+        $totalDays = abs($totalDays) - floor(abs($totalDays));
+        $moonPhase = $totalDays * 8 + 0.5;
+        $moonPhase = $moonPhase & 7;
+        return $moonPhase;
+    }
 }
-
-else {
-    list($y, $m, $d) = preg_split('/-/', date("Y-n-j", strtotime($date)));
-}
-// oblicza fazy księżyca domyślnie 7 faz: 0 - nów, 4 - pełnia
-if ($m < 3) {
-    $y--;
-    $m += 12;
-}
-++$m;
-$c = 365.25 * $y;
-$e = 30.6 * $m;
-$jd = $c + $e + $d - 694039.09; /* jd is total days elapsed */
-$jd /= 29.53; /* divide by the moon cycle (29.53 days) */
-$jd = abs($jd) - floor(abs($jd)); /* subtract integer part to leave fractional part of original jd */
-$b = $jd * 8 + 0.5; /* scale fraction from 0-8 and round by adding 0.5 */
-$b = $b & 7; /* 0 and 8 are the same so turn 8 into 0 */
-return $b;
-}}
